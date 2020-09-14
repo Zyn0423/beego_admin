@@ -20,6 +20,14 @@ type IndexController struct {
 }
 
 func (c *IndexController) Post()  {
-	c.Data["key_"] = "修改成功"
+
+	c.Data["key_"] = "Post修改成功"
 	c.TplName = "index_1.html"
+}
+
+func (this *IndexController)ShowGet()  {
+	id :=this.GetString(":id")
+	beego.Info(id)
+	this.Data["key_"] = "ShowGet修改成功"
+	this.TplName = "index_1.html"
 }
