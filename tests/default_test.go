@@ -9,7 +9,6 @@ import (
 	_ "goadmin/routers"
 
 	"github.com/astaxie/beego"
-	. "github.com/smartystreets/goconvey/convey"
 )
 
 func init() {
