@@ -6,23 +6,65 @@ import (
 	"goadmin/models"
 )
 
-
-type MainController struct {
+//TODO 1.登录控制器
+type LoginController struct {
 	beego.Controller
 }
+
+
+//登录Get
+func (this *LoginController)ShowLogin(){
+	this.TplName = "login.html"
+}
+//登录Post
+func (this *LoginController)HandleLogin()  {
+	//1.获取浏览器用户数据
+	name :=this.GetString("userName")
+	password :=this.GetString("password")
+	//2.处理数据
+	user :=models.User{}
+	if name == "" || password =="" {
+		beego.Info("输入的账号密码不能为空")
+		this.TplName="login.html"
+		return
+	}
+	user.UserName =name
+	//查询数据库
+	o :=orm.NewOrm()
+	err :=o.Read(&user,"user_name")
+	if err != nil{
+		beego.Info("查询账号失败")
+		this.TplName="login.html"
+		return
+	}
+
+	// 密码验证
+	if user.Password != password {
+		beego.Info("密码错误")
+		this.TplName="login.html"
+		return
+	}
+
+
+
+	beego.Info(name,password)
+	//this.Ctx.WriteString("登录成功")
+	this.TplName = "index.html"
+}
+
+
+
+
+//TODO 2.注册控制器
 type RegisterController struct {
 	beego.Controller
 }
-
-
-func (this *MainController)Get(){
-	this.TplName = "login.html"
-}
-
+//注册Get
 func (this *RegisterController) ShowRegisterGet() {
 	this.TplName = "register.html"
 
 }
+//注册Post
 func (this *RegisterController)HandleRegister()  {
 	// 1. 拿浏览器数据
 	//2.数据处理
@@ -47,5 +89,5 @@ func (this *RegisterController)HandleRegister()  {
 
 	beego.Info(name,password)
 	this.Ctx.WriteString("插入数据成功")
-	//this.TplName="login.html"
+	this.TplName="login.html"
 }
