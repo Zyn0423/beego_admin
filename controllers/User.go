@@ -50,6 +50,7 @@ func (this *LoginController)HandleLogin()  {
 	beego.Info(name,password)
 	//this.Ctx.WriteString("登录成功")
 	this.TplName = "index.html"
+	this.Redirect("/article",302)
 }
 
 
@@ -89,5 +90,5 @@ func (this *RegisterController)HandleRegister()  {
 
 	beego.Info(name,password)
 	this.Ctx.WriteString("插入数据成功")
-	this.TplName="login.html"
+	this.Redirect("/",302)    //todo 浏览器重定向发送请求，不可以发送数据    TplName 服务器端的不发送请求 可以发数据
 }
