@@ -23,6 +23,7 @@ func (this *ArticleController)ShowArticleGet()  {
 		return
 
 	}
+
 	this.Data["article"]=article
 	this.TplName="index.html"
 }
@@ -92,6 +93,7 @@ func (this *ArticleController) ShowArticleDetail() {
 	err :=o.Read(&article)
 	if err!=nil{
 		beego.Info("ID获取数据失败")
+		return
 	}
 
 	//修改阅读量
@@ -103,3 +105,19 @@ func (this *ArticleController) ShowArticleDetail() {
 
 }
 
+func (this *ArticleController)ShowDeleteDetail()  {
+	//先获取前端传来的数据
+	id,_:=this.GetInt("id")
+	//创建数据容器
+	var article models.Article
+	article.Id2 = id
+	//创建数据库对象
+	o :=orm.NewOrm()
+	_,err :=o.Delete(&article)
+	if err!= nil{
+		beego.Info("删除数据失败")
+		return
+	}
+	this.Redirect("/addarticle",302)
+
+}
