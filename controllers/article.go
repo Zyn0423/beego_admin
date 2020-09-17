@@ -75,6 +75,31 @@ func (this *ArticleController)HandleAddarticle()  {
 	}
 	this.Redirect("article",302)
 
+}
 
+func (this *ArticleController) ShowArticleDetail() {
+	//获取数据
+	id_,er:=this.GetInt("articleId")   // TODO 新的方法获取
+	//数据校验
+	if er != nil{
+		beego.Info("传递的链接错误")
+	}
+	beego.Info("获取的ID",id_)
+	o :=orm.NewOrm()
+	//获取数据
+	var article models.Article
+	article.Id2 = id_
+	err :=o.Read(&article)
+	if err!=nil{
+		beego.Info("ID获取数据失败")
+	}
+
+	//修改阅读量
+	article.Count+=1
+	o.Update(&article)  //更新数据
+	//返回视图页面
+	this.Data["article"] = article
+	this.TplName = "content.html"
 
 }
+
