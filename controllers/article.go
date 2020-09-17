@@ -13,10 +13,22 @@ type ArticleController struct {
 }
 
 func (this *ArticleController)ShowArticleGet()  {
+	// 获取数据库数据
+	o :=orm.NewOrm()
+	qt :=o.QueryTable("Article") //选择表
+	var article[]  models.Article  //定义一个切片容器
+	_,err := qt.All(&article) //查询数据
+	if err !=nil{
+		beego.Info("查询数据失败",err)
+		return
+
+	}
+	this.Data["article"]=article
 	this.TplName="index.html"
 }
 
-func (this *ArticleController)ShowAddarticleGet()  {
+func (this *ArticleController)ShowAddarticleGet()  {  //文章列表
+
 	this.TplName="add.html"
 }
 func (this *ArticleController)HandleAddarticle()  {
