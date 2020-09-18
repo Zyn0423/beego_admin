@@ -12,6 +12,8 @@ func init() {
 	beego.Router("/addarticle",&controllers.ArticleController{},"get:ShowAddarticleGet;post:HandleAddarticle") //TODO 添加文章
 	beego.Router("/showArticleDetail",&controllers.ArticleController{},"get:ShowArticleDetail") //TODO 查看详情
 	beego.Router("/deleteArticleDetail",&controllers.ArticleController{},"get:ShowDeleteDetail") //TODO 删除详情
+	beego.Router("/updataArticleDetail",&controllers.ArticleController{},"get:ShowUpdataDetail;post:HandleUpdataDetail") //TODO 修改详情
+
 	//beego.Router("/index", &controllers.IndexController{})
 	//beego.Router("/index", &controllers.IndexController{},"get:ShowGet;post:Post")  // TODO 指定路由
 	//beego.Router("/index/?:id", &controllers.IndexController{},"get:ShowGet;post:Post")  // TODO 正则路由

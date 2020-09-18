@@ -22,6 +22,7 @@ h1,h2,h3,h4,h4,h6{
 /* 在IE下去掉图片做链接时生成的框线 */
 img{
 	border:0px;
+	height: 20px;
 }
 
 /* 清除浮动以及清除margin-top塌陷 */

@@ -105,7 +105,7 @@ func (this *ArticleController) ShowArticleDetail() {
 
 }
 
-func (this *ArticleController)ShowDeleteDetail()  {
+func (this *ArticleController)ShowDeleteDetail()  {  //TODO 列表详情页删除
 	//先获取前端传来的数据
 	id,_:=this.GetInt("id")
 	//创建数据容器
@@ -118,6 +118,102 @@ func (this *ArticleController)ShowDeleteDetail()  {
 		beego.Info("删除数据失败")
 		return
 	}
-	this.Redirect("/addarticle",302)
+	this.Redirect("/article",302)
 
+}
+func (this *ArticleController)ShowUpdataDetail()  {
+	//获取前端传来数据
+	id ,_:=this.GetInt("id1")
+	var article models.Article
+	article.Id2 = id
+	o :=orm.NewOrm()
+	err := o.Read(&article)
+	if err!= nil{
+		beego.Info("查询数据失败")
+		return
+	}
+	this.Data["article"] = article
+	this.TplName="update.html"
+	beego.Info("get已结束")
+}
+
+func (this *ArticleController)HandleUpdataDetail()  {
+	beego.Info("POST已开启")
+	const filesize  = 5000000
+	articName:=this.GetString("articleName")
+	content:=this.GetString("content")
+	if articName == "" && content == ""{
+		beego.Info("没有数据请填写数据")
+		return
+	}
+	id,_ :=this.GetInt("id")
+
+	f,h,err:=this.GetFile("uploadname")  //TODO 获取上传图片
+	beego.Info(articName,content)
+	if err !=nil{
+		beego.Info("上传图片失败",err)
+		//创建数据库对象
+		o:=orm.NewOrm()
+		//TODO 更新数据前先查数据
+		var article =models.Article{Id2:id}
+		err =o.Read(&article)
+		if err !=nil{
+			beego.Info("查询数据失败",err)
+			return
+		}
+		//整理数据
+		article.Title = articName
+		article.Content = content
+		//插入数据
+		beego.Info(article)
+		_,err =o.Update(&article)
+		if err !=nil{
+			beego.Info("更新数据失败",err)
+
+		}
+		this.Redirect("article",302)
+
+	}
+	defer f.Close()
+	//判断文件格式
+	ext :=path.Ext(h.Filename)
+
+	if ext!= ".png" && ext!= ".jpg"&&ext!= ".jpeg" {
+		beego.Info("上传的图片格式错误")
+		return
+	}
+	if h.Size >filesize {
+		beego.Info("上传的图片大于",filesize,"字节")
+		return
+	}
+	t := time.Now().Format("2006-01-02 15:04:05")
+	// TODO 一直上传不上去"./static/img/"  加点
+	this.SaveToFile("uploadname","./static/img/"+t+ext)
+	if err !=nil{
+		beego.Info("保存图片失败",err)
+		return
+	}
+	//创建数据库对象
+	o:=orm.NewOrm()
+	//TODO 更新数据前先查数据
+	var article =models.Article{Id2:id}
+	err =o.Read(&article)
+	if err !=nil{
+		beego.Info("查询数据失败",err)
+		return
+	}
+	//整理数据
+
+	article.Title = articName
+	article.Content = content
+	article.Img = "./static/img/"+t+ext
+	//插入数据
+	beego.Info(article)
+	_,err =o.Update(&article)
+	if err !=nil{
+		beego.Info("更新数据失败",err)
+
+	}
+	this.Redirect("article",302)
+	//this.HandleAddarticle()
 }
