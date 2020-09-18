@@ -4,7 +4,9 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	"goadmin/models"
+	"math"
 	"path"
+	"strconv"
 	"time"
 )
 
@@ -12,19 +14,48 @@ type ArticleController struct {
 	beego.Controller
 }
 
-func (this *ArticleController)ShowArticleGet()  {
+func (this *ArticleController)ShowArticleGet()  {   //TODO 文章列表
 	// 获取数据库数据
+	pageSize := 1   // TODO 定义1页展示多少数据
 	o :=orm.NewOrm()
 	qt :=o.QueryTable("Article") //选择表
 	var article[]  models.Article  //定义一个切片容器
-	_,err := qt.All(&article) //查询数据
+	pageIndex:=this.GetString("pageIndex")
+	pageIndex1,err:=strconv.Atoi(pageIndex)//字符串转int
+	if err!=nil{
+		beego.Info("错误pageIndex1：",pageIndex1)
+		pageIndex1 =1
+	}
+
+	//------------>
+	//首先查数据库有多少条数据
+	count,err:=qt.Count()
+	if err !=nil{
+		beego.Info("查询多少条数据失败",err)
+		return
+	}
+
+	start := pageSize *(pageIndex1 -1)  //todo  0 ->2->4    每页展示数据*（当前页 -1）=数据库拿的数据
+	_,err=qt.Limit(pageSize,start).All(&article)
 	if err !=nil{
 		beego.Info("查询数据失败",err)
 		return
-
 	}
-
-	this.Data["article"]=article
+	firstPage :=false  //todo 固定上一页按钮
+	if pageIndex1 <2 {
+		firstPage =true
+	}
+	countPage := math.Ceil(float64(count)/float64(pageSize))  //向上取整  总共有多少页	//TODO 总数/展示页数 = 总共有多少页
+	nextPage :=false
+	if pageIndex1 >int(countPage){
+		nextPage =true
+	}
+	this.Data["firstPage"] =firstPage  //todo 5.方向标 控制上页面的超链接显示
+	this.Data["nextPage"] =nextPage  //todo 5.方向标 控制下页面的超链接显示
+	this.Data["countPage"] =countPage  //todo 2.总共有多少页
+	this.Data["article"]=article		//TODO 4.传出数据
+	this.Data["pageIndex"] = pageIndex1   //TODO 3. pageIndex1  而不是pageIndex
+	this.Data["count"] =count  //todo 1.总共多少条数据
 	this.TplName="index.html"
 }
 
@@ -134,11 +165,9 @@ func (this *ArticleController)ShowUpdataDetail()  {
 	}
 	this.Data["article"] = article
 	this.TplName="update.html"
-	beego.Info("get已结束")
 }
 
-func (this *ArticleController)HandleUpdataDetail()  {
-	beego.Info("POST已开启")
+func (this *ArticleController)HandleUpdataDetail()  {   //TODO 修改文章列表的指定编辑信息
 	const filesize  = 5000000
 	articName:=this.GetString("articleName")
 	content:=this.GetString("content")
@@ -203,7 +232,6 @@ func (this *ArticleController)HandleUpdataDetail()  {
 		return
 	}
 	//整理数据
-
 	article.Title = articName
 	article.Content = content
 	article.Img = "./static/img/"+t+ext
@@ -212,8 +240,6 @@ func (this *ArticleController)HandleUpdataDetail()  {
 	_,err =o.Update(&article)
 	if err !=nil{
 		beego.Info("更新数据失败",err)
-
 	}
 	this.Redirect("article",302)
-	//this.HandleAddarticle()
 }

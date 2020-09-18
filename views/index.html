@@ -79,11 +79,19 @@
             </table>
 
             <ul class="pagenation">
-                <li><a href="#">首页</a></li>
-                <li><a href="javascript:;">上一页 </a> </li>
-                <li> <a href="javascript:;">下一页</a></li>
-                <li><a href="#">末页</a></li>
-                <li>共5条记录/共5页/当前1页</li>
+                <li><a href="/article?pageIndex=1">首页</a></li>
+                {{if compare .firstPage true}}
+                    <li>上一页</li>
+                {{else }}
+                    <li><a href="/article?pageIndex={{.pageIndex |ShowPrePage }}">上一页 </a> </li>
+                {{end}}
+                {{if compare .nextPage true}}
+                    <li>下一页</li>
+                {{else}}
+                    <li> <a href="/article?pageIndex={{.pageIndex |ShowNextPage }}">下一页</a></li>
+                {{end}}
+                <li><a href="/article?pageIndex={{.countPage}}">末页</a></li>
+                <li>共{{.count}}条记录/共{{.countPage}}页/当前{{.pageIndex}}页</li>
             </ul>
         </div>
     </div>

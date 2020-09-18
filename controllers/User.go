@@ -49,7 +49,6 @@ func (this *LoginController)HandleLogin()  {
 
 	beego.Info(name,password)
 	//this.Ctx.WriteString("登录成功")
-	this.TplName = "index.html"
 	this.Redirect("/article",302)
 }
 
