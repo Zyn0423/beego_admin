@@ -26,7 +26,6 @@ func (this *ArticleController)ShowArticleGet()  {   //TODO 文章列表
 		beego.Info("错误pageIndex1：",pageIndex1)
 		pageIndex1 =1
 	}
-
 	//------------>
 	//首先查数据库有多少条数据
 	count,err:=qt.Count()
@@ -34,7 +33,6 @@ func (this *ArticleController)ShowArticleGet()  {   //TODO 文章列表
 		beego.Info("查询多少条数据失败",err)
 		return
 	}
-
 	start := pageSize *(pageIndex1 -1)  //todo  0 ->2->4    每页展示数据*（当前页 -1）=数据库拿的数据
 	_,err=qt.Limit(pageSize,start).All(&article)
 	if err !=nil{
@@ -67,6 +65,9 @@ func (this *ArticleController)HandleAddarticle()  {
 	const filesize  = 5000000
 	articName:=this.GetString("articleName")
 	content:=this.GetString("content")
+	artype := this.GetString("select")
+
+	beego.Info("----------->文章类型：",artype)
 	f,h,err:=this.GetFile("uploadname")  //TODO 获取上传图片
 	if err !=nil{
 		beego.Info("上传图片失败",err)
@@ -99,6 +100,8 @@ func (this *ArticleController)HandleAddarticle()  {
 	article.Title = articName
 	article.Content = content
 	article.Img = "./static/img/"+t+ext
+	//article.ArticleType =
+	//article.User = ""
 	//插入数据
 	_,err =o.Insert(&article)
 	if err !=nil{
@@ -242,4 +245,38 @@ func (this *ArticleController)HandleUpdataDetail()  {   //TODO 修改文章列�
 		beego.Info("更新数据失败",err)
 	}
 	this.Redirect("article",302)
+}
+
+func (this *ArticleController)ShowAddType()  {
+	var article[] models.ArticleType
+	o :=orm.NewOrm()
+	_,err :=o.QueryTable("ArticleType").All(&article)
+	if err!=nil{
+		beego.Info("查询数据失败",err)
+		return
+	}
+	this.Data["types"] = article
+	this.TplName = "addType.html"
+	//this.Redirect("/addTypeDetail",302)
+
+}
+func (this *ArticleController)HandleAddTpye()  {
+	//获取前端传来的数据
+	 typsinfo:=this.GetString("typeName")
+	//进行数据判断是否为空
+	if typsinfo ==""{
+		beego.Info("数据不能为空")
+		return
+	}
+	o :=orm.NewOrm()
+	var articletype models.ArticleType
+	articletype.TypeName=typsinfo
+	_,err :=o.Insert(&articletype)
+	if err != nil{
+		beego.Info("插入数据失败")
+		return
+	}
+
+	//创建数据库对象并把数据插入到数据库中
+	this.Redirect("addTypeDetail",302)
 }
