@@ -8,7 +8,7 @@ import (
 func init() {
   	beego.Router("/", &controllers.LoginController{},"get:ShowLogin;post:HandleLogin")  // TODO 登录
 	beego.Router("/register",&controllers.RegisterController{},"get:ShowRegisterGet;post:HandleRegister") // TODO 注册
-	beego.Router("/article",&controllers.ArticleController{},"get:ShowArticleGet") // TODO 登陆成功后台页面
+	beego.Router("/article",&controllers.ArticleController{},"get:ShowArticleGet;post:HandleArticlePost") // TODO 登陆成功后台页面
 	beego.Router("/addarticle",&controllers.ArticleController{},"get:ShowAddarticleGet;post:HandleAddarticle") //TODO 添加文章
 	beego.Router("/showArticleDetail",&controllers.ArticleController{},"get:ShowArticleDetail") //TODO 查看详情
 	beego.Router("/deleteArticleDetail",&controllers.ArticleController{},"get:ShowDeleteDetail") //TODO 删除详情

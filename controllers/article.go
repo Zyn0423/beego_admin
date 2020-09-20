@@ -14,6 +14,31 @@ type ArticleController struct {
 	beego.Controller
 }
 
+func (this *ArticleController)HandleArticlePost()  {
+	// 获取数据库数据
+	typeName:=this.GetString("select")
+	beego.Info("------->",typeName)
+	if typeName == "" {
+		beego.Info("下拉框获取数据失败")
+		return
+	}
+	o :=orm.NewOrm()//创建数据库对象
+	var article []models.Article // 详细信息表
+
+	_,err :=o.QueryTable("Article").RelatedSel("ArticleType").Filter("ArticleType__TypeName",typeName).All(&article)
+	beego.Info("---->结束",article)
+	//TODO该表名以及字段名_
+	//_,err :=o.QueryTable("Article").RelatedSel("ArticleType").Filter("ArticleType__TypeName").All(&article)
+	if err !=nil {
+		beego.Info("多表查询数据失败")
+		return
+	}
+	//beego.Info("查看已查到的数据",article)
+	//
+	//
+	//this.Redirect("article",302)
+}
+
 func (this *ArticleController)ShowArticleGet()  {   //TODO 文章列表
 	// 获取数据库数据
 	pageSize := 1   // TODO 定义1页展示多少数据
@@ -48,6 +73,16 @@ func (this *ArticleController)ShowArticleGet()  {   //TODO 文章列表
 	if pageIndex1 >int(countPage){
 		nextPage =true
 	}
+
+	var types []models.ArticleType
+	_,err =o.QueryTable("ArticleType").All(&types)
+	if err != nil{
+		beego.Info("查询消息失败")
+	}
+
+
+
+	this.Data["Types"]=types   // todo 6.下拉窗口
 	this.Data["firstPage"] =firstPage  //todo 5.方向标 控制上页面的超链接显示
 	this.Data["nextPage"] =nextPage  //todo 5.方向标 控制下页面的超链接显示
 	this.Data["countPage"] =countPage  //todo 2.总共有多少页
@@ -61,6 +96,10 @@ func (this *ArticleController)ShowAddarticleGet()  {  //文章列表
 
 	this.TplName="add.html"
 }
+
+
+
+
 func (this *ArticleController)HandleAddarticle()  {
 	const filesize  = 5000000
 	articName:=this.GetString("articleName")

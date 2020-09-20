@@ -12,10 +12,11 @@
                 if (!confirm("是否删除"))
                     return false
                 // confirm("是否删除")
+            });
+            $("#select").change(function () {
+                $("#form").submit()
             })
         })
-
-
     </script>
 
 </head>
@@ -48,11 +49,14 @@
         </div>
         <div class="pannel">
             <span class="sel_label">请选择文章分类：</span>
+            <form id = 'form' method="post" action="/article">
             <select name="select" id="select" class="sel_opt">
-                        <option selected="true">财经新闻</option>
-                <option>体育新闻</option>
-                <option>科技新闻</option>
+                {{range .Types}}
+                <option selected="true">{{.TypeName}}</option>
+                {{end}}
             </select>
+            <input type="submit" hidden="hidden">
+            </form>
 
             <table class="common_table">
                 <tr>
