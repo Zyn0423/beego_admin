@@ -36,12 +36,12 @@ func (this *ArticleController)HandleArticlePost()  {
 	//beego.Info("查看已查到的数据",article)
 	//
 	//
-	//this.Redirect("article",302)
+	this.Redirect("article",302)
 }
 
 func (this *ArticleController)ShowArticleGet()  {   //TODO 文章列表
 	// 获取数据库数据
-	pageSize := 1   // TODO 定义1页展示多少数据
+	pageSize := 5   // TODO 定义1页展示多少数据
 	o :=orm.NewOrm()
 	qt :=o.QueryTable("Article") //选择表
 	var article[]  models.Article  //定义一个切片容器
@@ -81,7 +81,6 @@ func (this *ArticleController)ShowArticleGet()  {   //TODO 文章列表
 	}
 
 
-
 	this.Data["Types"]=types   // todo 6.下拉窗口
 	this.Data["firstPage"] =firstPage  //todo 5.方向标 控制上页面的超链接显示
 	this.Data["nextPage"] =nextPage  //todo 5.方向标 控制下页面的超链接显示
@@ -94,6 +93,13 @@ func (this *ArticleController)ShowArticleGet()  {   //TODO 文章列表
 
 func (this *ArticleController)ShowAddarticleGet()  {  //文章列表
 
+	var types []models.ArticleType
+	o:=orm.NewOrm()
+	_,err :=o.QueryTable("ArticleType").All(&types)
+	if err != nil{
+		beego.Info("查询消息失败")
+	}
+	this.Data["Types"]=types   // todo 下拉窗口
 	this.TplName="add.html"
 }
 
@@ -104,18 +110,13 @@ func (this *ArticleController)HandleAddarticle()  {
 	const filesize  = 5000000
 	articName:=this.GetString("articleName")
 	content:=this.GetString("content")
-	artype := this.GetString("select")
-
-	beego.Info("----------->文章类型：",artype)
 	f,h,err:=this.GetFile("uploadname")  //TODO 获取上传图片
 	if err !=nil{
 		beego.Info("上传图片失败",err)
 		return
 	}
 	defer f.Close()
-	//判断文件格式
-	ext :=path.Ext(h.Filename)
-
+	ext :=path.Ext(h.Filename)  	//判断文件格式
 	if ext!= ".png" && ext!= ".jpg"&&ext!= ".jpeg" {
 		beego.Info("上传的图片格式错误")
 		return
@@ -125,22 +126,35 @@ func (this *ArticleController)HandleAddarticle()  {
 		return
 	}
 	t := time.Now().Format("2006-01-02 15:04:05")
-	beego.Info(t+ext)
 	// TODO 一直上传不上去"./static/img/"  加点
 	this.SaveToFile("uploadname","./static/img/"+t+ext)
+
 	if err !=nil{
 		beego.Info("保存图片失败",err)
 		return
 	}
-	//创建数据库对象
-	o:=orm.NewOrm()
-	//整理数据
-	var article =models.Article{}
+
+
+	o:=orm.NewOrm() 	//创建数据库对象
+	typename := this.GetString("select")  //todo 获取下拉框数据
+	if typename == ""{
+		beego.Info("typename不能为空")
+		return
+	}
+	beego.Info("typename--->",typename)
+	var articleType models.ArticleType  //  文章管理分类类型
+	var article =models.Article{} // 文章列表类型
+	articleType.TypeName= typename  //  TODO 把前端获取的值传给容器
+	err =o.Read(&articleType,"TypeName")	// 首先查文章管理分类类型数据是否在数据库
+	if err !=nil{
+		beego.Info("查询数据失败",err)
+	}
+
+
 	article.Title = articName
 	article.Content = content
 	article.Img = "./static/img/"+t+ext
-	//article.ArticleType =
-	//article.User = ""
+	article.ArticleType = &articleType  // todo 传入的是一个地址
 	//插入数据
 	_,err =o.Insert(&article)
 	if err !=nil{
@@ -148,10 +162,9 @@ func (this *ArticleController)HandleAddarticle()  {
 
 	}
 	this.Redirect("article",302)
-
 }
 
-func (this *ArticleController) ShowArticleDetail() {
+func (this *ArticleController) ShowArticleDetail() {  //TODO 查看详情页
 	//获取数据
 	id_,er:=this.GetInt("articleId")   // TODO 新的方法获取
 	//数据校验
@@ -160,8 +173,7 @@ func (this *ArticleController) ShowArticleDetail() {
 	}
 	beego.Info("获取的ID",id_)
 	o :=orm.NewOrm()
-	//获取数据
-	var article models.Article
+	var article models.Article	//获取数据
 	article.Id2 = id_
 	err :=o.Read(&article)
 	if err!=nil{
@@ -169,11 +181,13 @@ func (this *ArticleController) ShowArticleDetail() {
 		return
 	}
 
-	//修改阅读量
-	article.Count+=1
-	o.Update(&article)  //更新数据
-	//返回视图页面
-	this.Data["article"] = article
+	article.Count+=1	//修改阅读量
+	var articleType models.ArticleType  //  文章管理分类类型
+	articleType.Id = article.ArticleType.Id  // 将获取到ArticleType.id 传值给文章类型结构体中
+	o.Read(&articleType)  //查询该ID
+	o.Update(&article)  //更新数据 --->修改阅读量
+	this.Data["article"] = article	//返回视图页面
+	this.Data["TypeName"] =articleType.TypeName  //传文章类型前端显示
 	this.TplName = "content.html"
 
 }
