@@ -328,3 +328,22 @@ func (this *ArticleController)HandleAddTpye()  {
 	//创建数据库对象并把数据插入到数据库中
 	this.Redirect("addTypeDetail",302)
 }
+
+func (this *ArticleController)ShowDeleteTypeDetail()  {  //  TODO 删除文章类型数据
+	 id,err:=this.GetInt("id")
+	if err!= nil{
+		beego.Info("前端获取数据失败")
+		return
+	}
+	//创建数据容器
+	var articleType models.ArticleType
+	articleType.Id=id
+	//创建数据库对象
+	o :=orm.NewOrm()
+	_,err =o.Delete(&articleType)
+	if err!= nil{
+		beego.Info("删除数据失败")
+		return
+	}
+	this.Redirect("addTypeDetail",302)
+}
