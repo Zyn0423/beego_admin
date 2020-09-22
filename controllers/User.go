@@ -4,6 +4,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	"goadmin/models"
+	"time"
 )
 
 //TODO 1.登录控制器
@@ -11,9 +12,14 @@ type LoginController struct {
 	beego.Controller
 }
 
-
 //登录Get
 func (this *LoginController)ShowLogin(){
+	userName:=this.Ctx.GetCookie("userName")
+	//beego.Info("获取userName--->",userName)
+	if userName !=""{
+		this.Data["check"] = "checked"
+		this.Data["name"] =userName
+	}
 	this.TplName = "login.html"
 }
 //登录Post
@@ -21,6 +27,8 @@ func (this *LoginController)HandleLogin()  {
 	//1.获取浏览器用户数据
 	name :=this.GetString("userName")
 	password :=this.GetString("password")
+	check :=this.GetString("remember")
+	beego.Info("------>check",check)
 	//2.处理数据
 	user :=models.User{}
 	if name == "" || password =="" {
@@ -44,11 +52,10 @@ func (this *LoginController)HandleLogin()  {
 		this.TplName="login.html"
 		return
 	}
-
-
-
-	beego.Info(name,password)
-	//this.Ctx.WriteString("登录成功")
+	if check == "on"{  //判断是否勾选☑️
+		this.Ctx.SetCookie("userName",name,time.Second*3600)
+		beego.Info("POST --->",check,name)
+	}
 	this.Redirect("/article",302)
 }
 
@@ -72,6 +79,7 @@ func (this *RegisterController)HandleRegister()  {
 	//4.返回视图
 	name :=this.GetString("userName")
 	password :=this.GetString("password")
+
 	if name == "" || password =="" {
 		beego.Info("输入的账号密码不能为空")
 		this.Data["err_info"] = "输入的账号密码不能为空"

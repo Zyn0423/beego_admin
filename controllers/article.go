@@ -53,13 +53,13 @@ func (this *ArticleController)ShowArticleGet()  {   //TODO 文章列表
 	}
 	//------------>
 	//首先查数据库有多少条数据
-	count,err:=qt.Count()
+	count,err:=qt.RelatedSel("ArticleType").Count()
 	if err !=nil{
 		beego.Info("查询多少条数据失败",err)
 		return
 	}
 	start := pageSize *(pageIndex1 -1)  //todo  0 ->2->4    每页展示数据*（当前页 -1）=数据库拿的数据
-	_,err=qt.Limit(pageSize,start).All(&article)
+	_,err=qt.Limit(pageSize,start).RelatedSel("ArticleType").All(&article)
 	if err !=nil{
 		beego.Info("查询数据失败",err)
 		return
@@ -80,7 +80,7 @@ func (this *ArticleController)ShowArticleGet()  {   //TODO 文章列表
 		beego.Info("查询消息失败")
 	}
 
-
+	beego.Info("------->",article)
 	this.Data["Types"]=types   // todo 6.下拉窗口
 	this.Data["firstPage"] =firstPage  //todo 5.方向标 控制上页面的超链接显示
 	this.Data["nextPage"] =nextPage  //todo 5.方向标 控制下页面的超链接显示
@@ -134,14 +134,12 @@ func (this *ArticleController)HandleAddarticle()  {
 		return
 	}
 
-
 	o:=orm.NewOrm() 	//创建数据库对象
 	typename := this.GetString("select")  //todo 获取下拉框数据
 	if typename == ""{
 		beego.Info("typename不能为空")
 		return
 	}
-	beego.Info("typename--->",typename)
 	var articleType models.ArticleType  //  文章管理分类类型
 	var article =models.Article{} // 文章列表类型
 	articleType.TypeName= typename  //  TODO 把前端获取的值传给容器
@@ -149,8 +147,6 @@ func (this *ArticleController)HandleAddarticle()  {
 	if err !=nil{
 		beego.Info("查询数据失败",err)
 	}
-
-
 	article.Title = articName
 	article.Content = content
 	article.Img = "./static/img/"+t+ext
@@ -159,7 +155,6 @@ func (this *ArticleController)HandleAddarticle()  {
 	_,err =o.Insert(&article)
 	if err !=nil{
 		 beego.Info("插入数据失败",err)
-
 	}
 	this.Redirect("article",302)
 }
