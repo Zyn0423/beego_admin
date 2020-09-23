@@ -55,8 +55,11 @@ func (this *LoginController)HandleLogin()  {
 	if check == "on"{  //判断是否勾选☑️
 		this.Ctx.SetCookie("userName",name,time.Second*3600)
 		beego.Info("POST --->",check,name)
+	}else {
+		this.Ctx.SetCookie("userName",name,-1)
 	}
-	this.Redirect("/article",302)
+	this.SetSession("userName",name)//TODO 设置session
+	this.Redirect("/Article/article",302)
 }
 
 

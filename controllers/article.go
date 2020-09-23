@@ -13,6 +13,14 @@ import (
 type ArticleController struct {
 	beego.Controller
 }
+//func SessionUser(this *ArticleController) {
+//	// 获取数据库数据
+//	sessionName :=this.GetSession("userName")
+//	if sessionName == nil{
+//		this.Redirect("/",302)
+//		return
+//	}
+//}
 
 func (this *ArticleController)HandleArticlePost()  {
 	// 获取数据库数据
@@ -26,7 +34,6 @@ func (this *ArticleController)HandleArticlePost()  {
 	var article []models.Article // 详细信息表
 
 	_,err :=o.QueryTable("Article").RelatedSel("ArticleType").Filter("ArticleType__TypeName",typeName).All(&article)
-	beego.Info("---->结束",article)
 	//TODO该表名以及字段名_
 	//_,err :=o.QueryTable("Article").RelatedSel("ArticleType").Filter("ArticleType__TypeName").All(&article)
 	if err !=nil {
@@ -36,11 +43,20 @@ func (this *ArticleController)HandleArticlePost()  {
 	//beego.Info("查看已查到的数据",article)
 	//
 	//
-	this.Redirect("article",302)
+	this.Redirect("/Article/article",302)
 }
+
 
 func (this *ArticleController)ShowArticleGet()  {   //TODO 文章列表
 	// 获取数据库数据
+	//sessionName :=this.GetSession("userName")
+	//if sessionName == nil{
+	//	this.Redirect("/",302)
+	//
+	//	return
+	//}
+
+	//SessionUser(this)
 	pageSize := 5   // TODO 定义1页展示多少数据
 	o :=orm.NewOrm()
 	qt :=o.QueryTable("Article") //选择表
@@ -88,11 +104,13 @@ func (this *ArticleController)ShowArticleGet()  {   //TODO 文章列表
 	this.Data["article"]=article		//TODO 4.传出数据
 	this.Data["pageIndex"] = pageIndex1   //TODO 3. pageIndex1  而不是pageIndex
 	this.Data["count"] =count  //todo 1.总共多少条数据
+
+	this.Layout="layut.html"
 	this.TplName="index.html"
 }
 
 func (this *ArticleController)ShowAddarticleGet()  {  //文章列表
-
+	//SessionUser(this)
 	var types []models.ArticleType
 	o:=orm.NewOrm()
 	_,err :=o.QueryTable("ArticleType").All(&types)
@@ -100,6 +118,7 @@ func (this *ArticleController)ShowAddarticleGet()  {  //文章列表
 		beego.Info("查询消息失败")
 	}
 	this.Data["Types"]=types   // todo 下拉窗口
+	this.Layout="layut.html"
 	this.TplName="add.html"
 }
 
@@ -156,7 +175,7 @@ func (this *ArticleController)HandleAddarticle()  {
 	if err !=nil{
 		 beego.Info("插入数据失败",err)
 	}
-	this.Redirect("article",302)
+	this.Redirect("/Article/article",302)
 }
 
 func (this *ArticleController) ShowArticleDetail() {  //TODO 查看详情页
@@ -183,6 +202,7 @@ func (this *ArticleController) ShowArticleDetail() {  //TODO 查看详情页
 	o.Update(&article)  //更新数据 --->修改阅读量
 	this.Data["article"] = article	//返回视图页面
 	this.Data["TypeName"] =articleType.TypeName  //传文章类型前端显示
+	this.Layout="layut.html"
 	this.TplName = "content.html"
 
 }
@@ -200,7 +220,7 @@ func (this *ArticleController)ShowDeleteDetail()  {  //TODO 列表详情页删�
 		beego.Info("删除数据失败")
 		return
 	}
-	this.Redirect("/article",302)
+	this.Redirect("/Article/article",302)
 
 }
 func (this *ArticleController)ShowUpdataDetail()  {
@@ -251,7 +271,7 @@ func (this *ArticleController)HandleUpdataDetail()  {   //TODO 修改文章列�
 			beego.Info("更新数据失败",err)
 
 		}
-		this.Redirect("article",302)
+		this.Redirect("/Article/article",302)
 
 	}
 	defer f.Close()
@@ -292,7 +312,7 @@ func (this *ArticleController)HandleUpdataDetail()  {   //TODO 修改文章列�
 	if err !=nil{
 		beego.Info("更新数据失败",err)
 	}
-	this.Redirect("article",302)
+	this.Redirect("/Article/article",302)
 }
 
 func (this *ArticleController)ShowAddType()  {
@@ -304,6 +324,7 @@ func (this *ArticleController)ShowAddType()  {
 		return
 	}
 	this.Data["types"] = article
+	this.Layout="layut.html"
 	this.TplName = "addType.html"
 	//this.Redirect("/addTypeDetail",302)
 
@@ -326,7 +347,7 @@ func (this *ArticleController)HandleAddTpye()  {
 	}
 
 	//创建数据库对象并把数据插入到数据库中
-	this.Redirect("addTypeDetail",302)
+	this.Redirect("/Article/addTypeDetail",302)
 }
 
 func (this *ArticleController)ShowDeleteTypeDetail()  {  //  TODO 删除文章类型数据
@@ -345,5 +366,10 @@ func (this *ArticleController)ShowDeleteTypeDetail()  {  //  TODO 删除文章�
 		beego.Info("删除数据失败")
 		return
 	}
-	this.Redirect("addTypeDetail",302)
+	this.Redirect("/Article/addTypeDetail",302)
+}
+
+func (this *ArticleController)ShowLogout()  {
+	this.DelSession("userName")
+	this.Redirect("/",302)
 }
