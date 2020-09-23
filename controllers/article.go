@@ -119,6 +119,8 @@ func (this *ArticleController)ShowAddarticleGet()  {  //文章列表
 	}
 	this.Data["Types"]=types   // todo 下拉窗口
 	this.Layout="layut.html"
+	this.LayoutSections = make(map[string]string)
+	this.LayoutSections["contenthead"]="head.html"
 	this.TplName="add.html"
 }
 
